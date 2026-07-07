@@ -20,32 +20,42 @@ const StoryCard = ({ story, isBookmarked, onToggleBookmark }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-4">
-      <h2 className="text-xl font-semibold mb-2">{story.title}</h2>
-      <div className="flex gap-4 text-gray-600 mb-4">
-        <span>⭐ {story.points} points</span>
-        <span>👤 {story.author}</span>
-        <span>⏰ {story.postedAt}</span>
+    <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl p-8 mb-6 border border-gray-100 hover:shadow-2xl hover:border-blue-200 transition-all duration-500 transform hover:-translate-y-2 group">
+      <h2 className="text-2xl font-bold text-gray-800 mb-3 group-hover:text-blue-700 transition-colors duration-300">{story.title}</h2>
+      <div className="flex flex-wrap gap-5 text-gray-600 mb-6">
+        <span className="flex items-center gap-2 bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full font-semibold">
+          ⭐ {story.points} points
+        </span>
+        <span className="flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full font-semibold">
+          👤 {story.author}
+        </span>
+        <span className="flex items-center gap-2 bg-purple-100 text-purple-800 px-4 py-2 rounded-full font-semibold">
+          ⏰ {story.postedAt}
+        </span>
       </div>
-      <div className="flex gap-4">
+      <div className="flex flex-wrap gap-4">
         <a
           href={story.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2"
         >
-          Visit Article
+          Visit Article <span>→</span>
         </a>
         {user && (
           <button
             onClick={handleBookmark}
-            className={`px-4 py-2 rounded ${
+            className={`px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex items-center gap-2 ${
               isBookmarked
-                ? 'bg-red-500 text-white hover:bg-red-600'
-                : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                ? 'bg-gradient-to-r from-red-500 to-pink-600 text-white hover:from-red-600 hover:to-pink-700'
+                : 'bg-gradient-to-r from-gray-600 to-gray-700 text-white hover:from-gray-700 hover:to-gray-800'
             }`}
           >
-            {isBookmarked ? 'Remove Bookmark' : 'Bookmark'}
+            {isBookmarked ? (
+              <>❤️ Remove Bookmark</>
+            ) : (
+              <>🤍 Bookmark</>
+            )}
           </button>
         )}
       </div>

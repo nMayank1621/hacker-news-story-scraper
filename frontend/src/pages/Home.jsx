@@ -53,56 +53,85 @@ const Home = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-xl">Loading...</div>
+      <div className="flex flex-col justify-center items-center min-h-[70vh]">
+        <div className="w-20 h-20 border-8 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-6"></div>
+        <div className="text-3xl font-bold text-gray-700">Loading stories...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex justify-center items-center min-h-screen text-red-500">
-        {error}
+      <div className="flex flex-col justify-center items-center min-h-[70vh]">
+        <div className="text-8xl mb-6">😢</div>
+        <div className="text-3xl font-bold text-red-600 mb-4">{error}</div>
+        <button
+          onClick={() => window.location.reload()}
+          className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+        >
+          Try Again
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Top Stories</h1>
-      {stories.length === 0 ? (
-        <div className="text-center text-gray-500">No stories found</div>
-      ) : (
-        <>
-          {stories.map((story) => (
-            <StoryCard
-              key={story._id}
-              story={story}
-              isBookmarked={bookmarkedIds.includes(story._id)}
-              onToggleBookmark={toggleBookmark}
-            />
-          ))}
-          <div className="flex justify-center gap-4 mt-8">
-            <button
-              disabled={page === 1}
-              onClick={() => setPage(page - 1)}
-              className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
-            >
-              Previous
-            </button>
-            <span className="flex items-center">
-              Page {page} of {totalPages}
-            </span>
-            <button
-              disabled={page === totalPages}
-              onClick={() => setPage(page + 1)}
-              className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
-            >
-              Next
-            </button>
+    <div className="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
+      <div className="container mx-auto px-4 py-12 max-w-6xl">
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-extrabold bg-gradient-to-r from-blue-800 via-indigo-800 to-purple-800 bg-clip-text text-transparent mb-4">
+            📰 Top Hacker News Stories
+          </h1>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Discover and bookmark the latest tech news and discussions
+          </p>
+        </div>
+
+        {stories.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="text-8xl mb-6">📭</div>
+            <h2 className="text-3xl font-bold text-gray-700 mb-4">No stories found</h2>
+            <p className="text-gray-500">Check back later for fresh content!</p>
           </div>
-        </>
-      )}
+        ) : (
+          <>
+            <div className="space-y-6">
+              {stories.map((story, index) => (
+                <div
+                  key={story._id}
+                  className="animate-fadeIn"
+                  style={{ animationDelay: `${index * 0.1 + 's' }}
+                >
+                  <StoryCard
+                    story={story}
+                    isBookmarked={bookmarkedIds.includes(story._id)}
+                    onToggleBookmark={toggleBookmark}
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-center items-center gap-6 mt-12">
+              <button
+                disabled={page === 1}
+                onClick={() => setPage(page - 1)}
+                className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-8 py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
+              >
+                ← Previous
+              </button>
+              <span className="text-xl font-semibold text-gray-700 bg-white px-6 py-3 rounded-xl shadow-md">
+                Page {page} of {totalPages}
+              </span>
+              <button
+                disabled={page === totalPages}
+                onClick={() => setPage(page + 1)}
+                className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-8 py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
+              >
+                Next →
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 };
