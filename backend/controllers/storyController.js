@@ -1,8 +1,7 @@
 const Story = require('../models/Story');
 const User = require('../models/User');
-const { scrapeHackerNews } = require('../scraper/scraper');
 const { getIsConnected } = require('../config/db');
-const { addStories, addUsers, inMemoryStories } = require('../utils/memoryStore');
+const { addStories, addUsers } = require('../utils/memoryStore');
 
 const getStories = async (req, res) => {
   try {
@@ -95,15 +94,6 @@ const toggleBookmark = async (req, res) => {
   }
 };
 
-const scrape = async (req, res) => {
-  try {
-    const stories = await scrapeHackerNews();
-    res.json({ message: 'Scraping successful', stories });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
 const getBookmarks = async (req, res) => {
   try {
     const isConnected = getIsConnected();
@@ -132,6 +122,5 @@ module.exports = {
   getStories,
   getStoryById,
   toggleBookmark,
-  scrape,
   getBookmarks,
 };

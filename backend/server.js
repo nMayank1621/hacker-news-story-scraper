@@ -14,7 +14,16 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/stories', storyRoutes);
-app.use('/api/scrape', storyRoutes);
+
+// Dedicated scrape endpoint
+app.post('/api/scrape', async (req, res) => {
+  try {
+    const stories = await scrapeHackerNews();
+    res.json({ message: 'Scraping successful', stories });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 const PORT = process.env.PORT || 5000;
 
