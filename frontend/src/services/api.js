@@ -17,7 +17,6 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Global response interceptor to handle 401 errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
