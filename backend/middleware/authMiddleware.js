@@ -23,16 +23,20 @@ const verifyToken = async (req, res, next) => {
           req.user = { ...user, password: undefined };
         }
       }
+
+      if (!req.user) {
+        return res.status(401).json({ message: 'Not authorized, user not found' });
+      }
       
       next();
     } catch (error) {
-      console.error(error);
+      console.error('authMiddleware error:', error);
       res.status(401).json({ message: 'Not authorized, token failed' });
     }
-  }
-
-  if (!token) {
-    res.status(401).json({ message: 'Not authorized, no token' });
+  } else {
+    if (!token) {
+      res.status(401).json({ message: 'Not authorized, no token' });
+    }
   }
 };
 
