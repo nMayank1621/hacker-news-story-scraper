@@ -5,6 +5,12 @@ import { toast } from 'react-toastify';
 const StoryCard = ({ story, isBookmarked, onToggleBookmark }) => {
   const { user } = useAuth();
 
+  console.log('StoryCard render:', { 
+    storyId: story._id, 
+    storyIdType: typeof story._id, 
+    isBookmarked 
+  }); // Debug log
+
   const handleBookmark = async () => {
     if (!user) {
       toast.error('Please login to bookmark');
@@ -15,6 +21,7 @@ const StoryCard = ({ story, isBookmarked, onToggleBookmark }) => {
       onToggleBookmark(story._id);
       toast.success(isBookmarked ? 'Bookmark removed' : 'Bookmark added');
     } catch (error) {
+      console.error('handleBookmark error:', error.response || error); // Debug log
       toast.error('Failed to toggle bookmark');
     }
   };

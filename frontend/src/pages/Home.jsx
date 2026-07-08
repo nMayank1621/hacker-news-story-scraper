@@ -29,9 +29,12 @@ const Home = () => {
     if (!user) return;
     try {
       const res = await api.get('/stories/bookmarks');
-      setBookmarkedIds(res.data.map((s) => s._id));
+      console.log('fetchBookmarks response:', res.data); // Debug log
+      const ids = res.data.map((s) => s._id.toString());
+      console.log('bookmarkedIds set to:', ids); // Debug log
+      setBookmarkedIds(ids);
     } catch (err) {
-      console.error('Failed to fetch bookmarks');
+      console.error('Failed to fetch bookmarks:', err.response || err); // Debug log
     }
   };
 
@@ -44,17 +47,22 @@ const Home = () => {
   }, [user]);
 
   const toggleBookmark = (storyId) => {
-    setBookmarkedIds((prev) =>
-      prev.includes(storyId)
-        ? prev.filter((id) => id !== storyId)
-        : [...prev, storyId]
-    );
+    console.log('toggleBookmark called with id:', storyId); // Debug log
+    setBookmarkedIds((prev) => {
+      const idStr = storyId.toString();
+      console.log('Current bookmarkedIds:', prev); // Debug log
+      if (prev.includes(idStr)) {
+        return prev.filter((id) => id !== idStr);
+      } else {
+        return [...prev, idStr];
+      }
+    });
   };
 
   if (loading) {
     return (
       <div className="flex flex-col justify-center items-center min-h-[70vh]">
-        <div className="w-20 h-20 border-8 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-6"></div>
+        <div className="w-20 h-20 border-8 border-blue-20 border-t-blue-600 rounded-full animate-spin mb-6"></div>
         <div className="text-3xl font-bold text-gray-700">Loading stories...</div>
       </div>
     );
@@ -100,11 +108,11 @@ const Home = () => {
                 <div
                   key={story._id}
                   className="animate-fadeIn"
-                  style={{ animationDelay: `${index * 0.1 + 's' }}
+                  style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <StoryCard
                     story={story}
-                    isBookmarked={bookmarkedIds.includes(story._id)}
+                    isBookmarked={bookmarkedIds.includes(story._id.toString())}
                     onToggleBookmark={toggleBookmark}
                   />
                 </div>
