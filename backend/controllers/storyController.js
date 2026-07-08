@@ -1,7 +1,9 @@
-const Story = require('../models/Story');
-const User = require('../models/User');
-const { getIsConnected } = require('../config/db');
-const { addStories, addUsers } = require('../utils/memoryStore');
+const Story = require("../models/Story");
+const User = require("../models/User");
+const { getIsConnected } = require("../config/db");
+const { addStories, addUsers } = require("../utils/memoryStore");
+
+// ================= GET STORIES =================
 
 const getStories = async (req, res) => {
   try {
@@ -10,18 +12,25 @@ const getStories = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const isConnected = getIsConnected();
-    let stories, total;
+
+    let stories = [];
+    let total = 0;
 
     if (isConnected) {
       stories = await Story.find({ enabled: true })
         .sort({ points: -1 })
         .skip(skip)
         .limit(limit);
+
       total = await Story.countDocuments({ enabled: true });
     } else {
-      const sortedStories = [...addStories.find()].sort((a, b) => b.points - a.points);
-      stories = sortedStories.slice(skip, skip + limit);
-      total = sortedStories.length;
+      const allStories = addStories.find();
+
+      stories = [...allStories]
+        .sort((a, b) => b.points - a.points)
+        .slice(skip, skip + limit);
+
+      total = allStories.length;
     }
 
     res.json({
@@ -30,91 +39,145 @@ const getStories = async (req, res) => {
       totalPages: Math.ceil(total / limit),
       total,
     });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
   }
 };
 
+// ================= GET STORY =================
+
 const getStoryById = async (req, res) => {
   try {
-    const isConnected = getIsConnected();
     let story;
 
-    if (isConnected) {
+    if (getIsConnected()) {
       story = await Story.findById(req.params.id);
     } else {
       story = addStories.findById(req.params.id);
     }
 
-    if (story) {
-      res.json(story);
-    } else {
-      res.status(404).json({ message: 'Story not found' });
+    if (!story) {
+      return res.status(404).json({
+        message: "Story not found",
+      });
     }
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+
+    res.json(story);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: err.message,
+    });
   }
 };
 
+// ================= TOGGLE BOOKMARK =================
+
 const toggleBookmark = async (req, res) => {
   try {
-    const isConnected = getIsConnected();
-    let user;
     const storyId = req.params.id;
 
-    if (isConnected) {
+    let user;
+
+    if (getIsConnected()) {
       user = await User.findById(req.user._id);
     } else {
       user = addUsers.findById(req.user._id);
     }
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({
+        message: "User not found",
+      });
     }
 
-    const isBookmarked = user.bookmarks.includes(storyId);
+    const bookmarkIds = user.bookmarks.map((bookmark) =>
+      typeof bookmark === "object"
+        ? bookmark._id.toString()
+        : bookmark.toString()
+    );
 
-    if (isBookmarked) {
-      user.bookmarks = user.bookmarks.filter(
-        (id) => id.toString() !== storyId.toString()
-      );
+    const exists = bookmarkIds.includes(storyId);
+
+    if (exists) {
+      user.bookmarks = user.bookmarks.filter((bookmark) => {
+        const id =
+          typeof bookmark === "object"
+            ? bookmark._id.toString()
+            : bookmark.toString();
+
+        return id !== storyId;
+      });
     } else {
       user.bookmarks.push(storyId);
     }
 
-    if (isConnected) {
+    if (getIsConnected()) {
       await user.save();
     } else {
-      addUsers.findByIdAndUpdate(user._id, { bookmarks: user.bookmarks });
+      addUsers.findByIdAndUpdate(user._id, {
+        bookmarks: user.bookmarks,
+      });
     }
 
-    res.json({ bookmarks: user.bookmarks });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.json({
+      success: true,
+      bookmarks: user.bookmarks,
+    });
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({
+      message: err.message,
+    });
   }
 };
 
+// ================= GET BOOKMARKS =================
 const getBookmarks = async (req, res) => {
   try {
     const isConnected = getIsConnected();
-    let user;
 
     if (isConnected) {
-      user = await User.findById(req.user._id).populate('bookmarks');
-    } else {
-      user = addUsers.findById(req.user._id);
-      if (user) {
-        user.bookmarks = user.bookmarks.map(id => addStories.findById(id)).filter(Boolean);
+      const user = await User.findById(req.user._id).populate("bookmarks");
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      return res.json(user.bookmarks);
+    }
+
+    const user = addUsers.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const bookmarks = [];
+
+    for (const bookmark of user.bookmarks) {
+
+      // Already a story object
+      if (typeof bookmark === "object" && bookmark.title) {
+        bookmarks.push(bookmark);
+      }
+
+      // Bookmark is an ID
+      else {
+        const story = addStories.findById(bookmark);
+        if (story) bookmarks.push(story);
       }
     }
 
-    if (user) {
-      res.json(user.bookmarks);
-    } else {
-      res.status(404).json({ message: 'User not found' });
-    }
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.json(bookmarks);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: err.message,
+    });
   }
 };
 

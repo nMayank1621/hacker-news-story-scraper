@@ -1,12 +1,24 @@
 const express = require('express');
+
 const {
   getStories,
   getStoryById,
   toggleBookmark,
   getBookmarks,
 } = require('../controllers/storyController');
+
 const { verifyToken } = require('../middleware/authMiddleware');
+
 const router = express.Router();
+
+// ✅ Debug imports
+console.log({
+  getStories,
+  getStoryById,
+  toggleBookmark,
+  getBookmarks,
+  verifyToken,
+});
 
 router.get('/', getStories);
 router.get('/bookmarks', verifyToken, getBookmarks);

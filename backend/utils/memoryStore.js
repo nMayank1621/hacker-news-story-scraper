@@ -1,6 +1,12 @@
 // In-memory fallback store when MongoDB is unavailable
 let inMemoryStories = [];
 let inMemoryUsers = [];
+let idCounter = 0;
+
+const generateId = () => {
+  idCounter += 1;
+  return `${Date.now()}-${idCounter}`;
+};
 
 const addStories = {
   find: (query = {}) => {
@@ -19,7 +25,7 @@ const addStories = {
     return inMemoryStories.find(s => s._id === id);
   },
   create: (story) => {
-    const newStory = { ...story, _id: Date.now().toString(), createdAt: new Date(), updatedAt: new Date() };
+    const newStory = { ...story, _id: generateId(), createdAt: new Date(), updatedAt: new Date() };
     inMemoryStories.push(newStory);
     return newStory;
   },
@@ -47,7 +53,7 @@ const addUsers = {
     return inMemoryUsers.find(u => u._id === id);
   },
   create: (user) => {
-    const newUser = { ...user, _id: Date.now().toString(), bookmarks: [], createdAt: new Date(), updatedAt: new Date() };
+    const newUser = { ...user, _id: generateId(), bookmarks: [], createdAt: new Date(), updatedAt: new Date() };
     inMemoryUsers.push(newUser);
     return newUser;
   },
@@ -57,7 +63,7 @@ const addUsers = {
       inMemoryUsers[index] = { ...inMemoryUsers[index], ...updateData, updatedAt: new Date() };
       return inMemoryUsers[index];
     }
-    return inMemoryUsers[index];
+    return null;
   }
 };
 
